@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orbital Cipher - Control Panel</title>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #00ffcc;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .panel {
+            background: rgba(16, 24, 48, 0.9);
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            color: #ffffff;
+            border-bottom: 1px solid #00ffcc;
+            padding-bottom: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .info-box {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 6px;
+            border-left: 4px solid #ff0055;
+        }
+
+        .label {
+            font-size: 0.75rem;
+            color: #88a0c0;
+            text-transform: uppercase;
+        }
+
+        .value {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .clave-principal {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #ff0055;
+            text-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+            letter-spacing: 4px;
+            margin: 10px 0;
+            text-transform: uppercase;
+        }
+
+        .cipher-section {
+            margin-top: 20px;
+            border-top: 1px dashed #00ffcc;
+            padding-top: 15px;
+            text-align: left;
+        }
+
+        textarea {
+            width: 100%;
+            height: 60px;
+            background: #05070f;
+            border: 1px solid #557090;
+            color: #ffffff;
+            font-family: inherit;
+            padding: 8px;
+            box-sizing: border-box;
+            resize: none;
+            border-radius: 4px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #00ffcc;
+            box-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+        }
+
+        .output-box {
+            background: rgba(0, 255, 204, 0.1);
+            border: 1px solid #00ffcc;
+            color: #00ffcc;
+            font-weight: bold;
+            word-wrap: break-word;
+        }
+
+        .footer {
+            font-size: 0.7rem;
+            color: #557090;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="panel">
+        <h1>Orbital Cipher System</h1>
+        
+        <div class="info-grid">
+            <div class="info-box">
+                <div class="label">Orbit Status</div>
+                <div class="value" id="semana-actual">...</div>
+            </div>
+            <div class="info-box" style="border-left-color: #00ffcc;">
+                <div class="label">Next Week</div>
+                <div class="value" id="proxima-clave" style="color: #ffffff;">...</div>
+            </div>
+        </div>
+
+        <div class="label">Active Encryption Key</div>
+        <div class="clave-principal" id="clave-espacial">---</div>
+
+        <div class="cipher-section">
+            <div class="label" style="color: #ffffff;">Input Message (Unencrypted):</div>
+            <textarea id="input-mensaje" placeholder="Type your message here..." oninput="procesarCifrado()"></textarea>
+
+            <div class="label" style="color: #ff0055;">Output Ciphertext:</div>
+            <textarea id="output-mensaje" class="output-box" readonly placeholder="Encrypted transmission output..."></textarea>
+        </div>
+
+        <div class="footer">
+            TRANSMISSION ENCRYPTED // LAUNCHPAD TERMINAL
+        </div>
+    </div>
+
+    <script>
+        const clavesEspaciales = [
+            "SUN", "MOON", "MARS", "NEPTUNE", "ORION", "APOLLO", "COMET", "GALAXY", 
+            "ASTEROID", "QUASAR", "PULSAR", "NEBULA", "AURORA", "ZENITH", "ORBIT", "COSMOS",
+            "TITAN", "EUROPA", "GANYMEDE", "CALLISTO", "IO", "PHOBOS", "DEIMOS", "SATURN",
+            "URANUS", "JUPITER", "VENUS", "MERCURY", "PLUTO", "CERES", "ERIS", "HAUMEA",
+            "MAKEMAKE", "SIRIUS", "VEGA", "ANTARES", "BETELGEUSE", "RIGEL", "ALDEBARAN", "SPICA",
+            "PROXIMA", "ANDROMEDA", "HUBBLE", "WEBB", "VOYAGER", "ARTEMIS", "ISS", "MIR",
+            "SPUTNIK", "CASSINI", "KEPLER", "HALLEY"
+        ];
+
+        const alfabeto = "abcdefghijklmnopqrstuvwxyz";
+
+        function obtenerNumeroSemana() {
+            const hoy = new Date();
+            const primeroDeAnio = new Date(hoy.getFullYear(), 0, 1);
+            const dias = Math.floor((hoy - primeroDeAnio) / (24 * 60 * 60 * 1000));
+            return Math.floor(dias / 7) % 52;
+        }
+
+        let claveActual = "";
+
+        function iniciarPanel() {
+            const numSemana = obtenerNumeroSemana();
+            claveActual = clavesEspaciales[numSemana];
+            
+            document.getElementById("semana-actual").innerText = "WEEK " + (numSemana + 1);
+            document.getElementById("clave-espacial").innerText = claveActual;
+            
+            const numProximaSemana = (numSemana + 1) % 52;
+            document.getElementById("proxima-clave").innerText = clavesEspaciales[numProximaSemana];
+        }
+
+        function procesarCifrado() {
+            const textoOriginal = document.getElementById("input-mensaje").value.toLowerCase();
+            const claveLimpia = claveActual.toLowerCase();
+            let textoCifrado = "";
+            
+            let indiceLetraValida = 0; 
+
+            for (let i = 0; i < textoOriginal.length; i++) {
+                const char = textoOriginal[i];
+
+                if (char === " " || char === "≡") {
+                    textoCifrado += "≡";
+                    continue; 
+                }
+
+                const indexEnAlfabeto = alfabeto.indexOf(char);
+
+                if (indexEnAlfabeto === -1) {
+                    textoCifrado += char;
+                    continue;
+                }
+
+                const claveChar = claveLimpia[indiceLetraValida % claveLimpia.length];
+                const valorClaveBase = alfabeto.indexOf(claveChar) + 1; 
+                
+                // REGLA CORREGIDA: La fuerza sube +1 cada 2 letras procesadas en total
+                const fuerzaExtra = Math.floor(indiceLetraValida / 2);
+
+                let nuevaPos = (indexEnAlfabeto + valorClaveBase + fuerzaExtra) % 26;
+                
+                textoCifrado += alfabeto[nuevaPos];
+                indiceLetraValida++;
+            }
+
+            document.getElementById("output-mensaje").value = textoCifrado.toUpperCase();
+        }
+
+        iniciarPanel();
+    </script>
+
+</body>
+</html>
