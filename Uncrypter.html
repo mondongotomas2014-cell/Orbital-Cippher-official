@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛰️ UNCRYPT ORBITAL 🛰️</title>
+    <style>
+        body {
+            background-color: #0b0c10;
+            color: #66fcf1;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .panel {
+            background-color: #1f2833;
+            border: 2px solid #45f3ff;
+            box-shadow: 0 0 20px #45f3ff33, inset 0 0 15px #45f3ff11;
+            border-radius: 10px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-top: 0;
+            color: #45f3ff;
+            text-shadow: 0 0 10px #45f3ff88;
+            letter-spacing: 3px;
+        }
+
+        .subtitle {
+            color: #c5a880;
+            font-size: 0.85rem;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin: 15px 0 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #c5a8a0;
+        }
+
+        input, textarea {
+            width: 100%;
+            background-color: #0b0c10;
+            border: 1px solid #45f3ff66;
+            color: #ffffff;
+            padding: 12px;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: inherit;
+            resize: none;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #45f3ff;
+            box-shadow: 0 0 8px #45f3ff66;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin: 25px 0 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .btn-enc {
+            background-color: transparent;
+            border: 2px solid #45f3ff;
+            color: #45f3ff;
+        }
+
+        .btn-enc:hover {
+            background-color: #45f3ff;
+            color: #0b0c10;
+            box-shadow: 0 0 12px #45f3ff;
+        }
+
+        .btn-des {
+            background-color: transparent;
+            border: 2px solid #66fcf1;
+            color: #66fcf1;
+        }
+
+        .btn-des:hover {
+            background-color: #66fcf1;
+            color: #0b0c10;
+            box-shadow: 0 0 12px #66fcf1;
+        }
+
+        .btn-nuke {
+            background-color: #2d1414;
+            border: 1px dashed #ff4d4d;
+            color: #ff4d4d;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn-nuke:hover {
+            background-color: #ff4d4d;
+            color: #0b0c10;
+            box-shadow: 0 0 15px #ff4d4d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="panel">
+    <h1>UNCRYPT ORBITAL</h1>
+    <div class="subtitle">[ SUBSISTEMA DE COMUNICACIONES ]</div>
+    
+    <label for="key">LLAVE DE CIFRADO (Ej: IO):</label>
+    <input type="text" id="key" value="IO" placeholder="Introduce la clave de órbita..." autocomplete="off">
+    
+    <label for="inputMessage">ENTRADA DE TRANSMISIÓN:</label>
+    <textarea id="inputMessage" rows="4" placeholder="Pegá el código cifrado o texto plano acá..."></textarea>
+    
+    <div class="btn-group">
+        <button class="btn-enc" onclick="process(true)">CIFRAR MÓDULO</button>
+        <button class="btn-des" onclick="process(false)">DESCIFRAR ÓRBITA</button>
+    </div>
+    
+    <label for="outputMessage">CONSOLA DE SALIDA:</label>
+    <textarea id="outputMessage" rows="4" readonly placeholder="Los datos procesados aparecerán acá..."></textarea>
+    
+    <button class="btn-nuke" onclick="nuke()">⚠️ PROTOCOLO DE PURGA (BORRAR TODO)</button>
+</div>
+
+<script>
+    const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    function process(isEncrypt) {
+        let key = document.getElementById("key").value.toUpperCase().replace(/[^A-Z]/g, '');
+        let input = document.getElementById("inputMessage").value.toUpperCase();
+        
+        if (key.length === 0) {
+            alert("¡Necesitás ingresar una clave válida (letras de la A a la Z)!");
+            return;
+        }
+
+        let output = "";
+        let validCharCount = 0;
+
+        for (let i = 0; i < input.length; i++) {
+            let char = input[i];
+            
+            if (ABC.includes(char)) {
+                let index = ABC.indexOf(char);
+                
+                // Obtener la letra de la clave que corresponde a este paso cíclicamente
+                let keyChar = key[validCharCount % key.length];
+                let keyShift = ABC.indexOf(keyChar);
+                
+                // La fuerza dinámica aumenta +1 cada 2 letras válidas procesadas
+                let dynamicShift = Math.floor(validCharCount / 2);
+                
+                // Suma total o resta total del desplazamiento
+                let totalShift = keyShift + dynamicShift;
+                
+                let newIndex;
+                if (isEncrypt) {
+                    newIndex = (index + totalShift) % 26;
+                } else {
+                    newIndex = (index - totalShift) % 26;
+                    if (newIndex < 0) newIndex += 26;
+                }
+                
+                output += ABC[newIndex];
+                validCharCount++;
+            } else {
+                // Mantiene espacios, signos y emojis como 🥀 intactos
+                output += char;
+            }
+        }
+        document.getElementById("outputMessage").value = output;
+    }
+
+    function nuke() {
+        document.getElementById("inputMessage").value = "";
+        document.getElementById("outputMessage").value = "";
+        document.getElementById("key").value = "IO";
+    }
+</script>
+
+</body>
+</html>
