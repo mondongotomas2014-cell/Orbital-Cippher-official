@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ NEBULA CIPHER v2 ⚡</title>
+    <style>
+        /* Estética Cyberpunk / Terminal */
+        body {
+            background-color: #0a0a0c;
+            color: #00ffcc;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .panel {
+            background-color: #111116;
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 15px #00ffcc44, inset 0 0 10px #00ffcc22;
+            border-radius: 8px;
+            padding: 25px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-top: 0;
+            text-shadow: 0 0 8px #00ffcc;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #ff0055;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px #ff005588;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin: 10px 0 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            background-color: #1a1a24;
+            border: 1px solid #00ffcc88;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+            resize: none;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #00ffcc;
+            box-shadow: 0 0 8px #00ffcc88;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .btn-enc {
+            background-color: transparent;
+            border: 2px solid #00ffcc;
+            color: #00ffcc;
+        }
+
+        .btn-enc:hover {
+            background-color: #00ffcc;
+            color: #000;
+            box-shadow: 0 0 10px #00ffcc;
+        }
+
+        .btn-des {
+            background-color: transparent;
+            border: 2px solid #ff0055;
+            color: #ff0055;
+        }
+
+        .btn-des:hover {
+            background-color: #ff0055;
+            color: #fff;
+            box-shadow: 0 0 10px #ff0055;
+        }
+
+        .btn-nuke {
+            background-color: #331111;
+            border: 1px dashed #ff0000;
+            color: #ff5555;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-nuke:hover {
+            background-color: #ff0000;
+            color: #000;
+            box-shadow: 0 0 12px #ff0000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="panel">
+    <h1>NEBULA CIPHER v2</h1>
+    <div class="subtitle">[ ACCESO RESTRINGIDO ]</div>
+    
+    <label for="key">LLAVE DE ORDENAMIENTO (Ej: GOJO):</label>
+    <input type="text" id="key" value="GOJO" placeholder="Introduce la clave semanal..." autocomplete="off">
+    
+    <label for="shift">FUERZA DE ROTACIÓN BASE:</label>
+    <input type="number" id="shift" value="3" min="1" max="25">
+    
+    <label for="inputMessage">ENTRADA DE DATOS:</label>
+    <textarea id="inputMessage" rows="4" placeholder="Escribí el texto para procesar..."></textarea>
+    
+    <div class="btn-group">
+        <button class="btn-enc" onclick="process(true)">ENCRIPTAR</button>
+        <button class="btn-des" onclick="process(false)">DESCIFRAR</button>
+    </div>
+    
+    <label for="outputMessage">CONSOLA DE SALIDA:</label>
+    <textarea id="outputMessage" rows="4" readonly placeholder="El resultado aparecerá acá..."></textarea>
+    
+    <button class="btn-nuke" onclick="nuke()">⚠️ AUTODESTRUCCIÓN (BORRAR TODO)</button>
+</div>
+
+<script>
+    const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    // Genera un alfabeto personalizado basado en una palabra clave
+    function generateCustomABC(key) {
+        let cleanKey = key.toUpperCase().replace(/[^A-Z]/g, '');
+        let custom = "";
+        
+        // Agregar letras de la clave sin repetir
+        for (let char of cleanKey) {
+            if (!custom.includes(char)) custom += char;
+        }
+        // Rellenar con las letras que faltan del ABC original
+        for (let char of ABC) {
+            if (!custom.includes(char)) custom += char;
+        }
+        return custom;
+    }
+
+    function process(isEncrypt) {
+        let key = document.getElementById("key").value;
+        let baseShift = parseInt(document.getElementById("shift").value) || 0;
+        let input = document.getElementById("inputMessage").value.toUpperCase();
+        
+        let customABC = generateCustomABC(key);
+        let output = "";
+        let validCharCount = 0;
+
+        for (let i = 0; i < input.length; i++) {
+            let char = input[i];
+            
+            if (customABC.includes(char)) {
+                let index = customABC.indexOf(char);
+                // La fuerza aumenta +1 cada 2 letras válidas procesadas
+                let dynamicShift = baseShift + Math.floor(validCharCount / 2);
+                
+                let newIndex;
+                if (isEncrypt) {
+                    newIndex = (index + dynamicShift) % 26;
+                } else {
+                    newIndex = (index - dynamicShift) % 26;
+                    if (newIndex < 0) newIndex += 26;
+                }
+                
+                output += customABC[newIndex];
+                validCharCount++;
+            } else {
+                // Mantiene espacios, signos y emojis (como 🥀) intactos sin sumar fuerza
+                output += char;
+            }
+        }
+        document.getElementById("outputMessage").value = output;
+    }
+
+    // Botón de pánico para limpiar todo al toque
+    function nuke() {
+        document.getElementById("inputMessage").value = "";
+        document.getElementById("outputMessage").value = "";
+        document.getElementById("key").value = "GOJO";
+        document.getElementById("shift").value = "3";
+    }
+</script>
+
+</body>
+</html>
